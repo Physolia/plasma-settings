@@ -14,12 +14,12 @@ import org.kde.plasma.settings 0.1
 
 Kirigami.ApplicationWindow {
     id: rootItem
-    
+
     pageStack.globalToolBar.style: Kirigami.ApplicationHeaderStyle.ToolBar
     pageStack.globalToolBar.showNavigationButtons: Kirigami.ApplicationHeaderStyle.ShowBackButton;
-    
+
     property alias currentModule: module
-    
+
     // pop pages when not in use
     Connections {
         target: applicationWindow().pageStack
@@ -27,7 +27,7 @@ Kirigami.ApplicationWindow {
             timer.restart();
         }
     }
-    
+
     // wait for animation to finish before popping pages
     Timer {
         id: timer
@@ -39,7 +39,7 @@ Kirigami.ApplicationWindow {
             }
         }
     }
-    
+
     // initialize context drawer
     contextDrawer: Kirigami.ContextDrawer {
         id: contextDrawer
@@ -48,20 +48,20 @@ Kirigami.ApplicationWindow {
     readonly property real widescreenThreshold: 720
     property bool isWidescreen: width >= widescreenThreshold
     onIsWidescreenChanged: changeNav(isWidescreen);
-    
+
     // change between sidebar and single page listview
     function changeNav(toWidescreen) {
         if (SettingsApp.singleModule) return;
-        
+
         if (toWidescreen) {
             // load sidebars
             sidebarLoader.active = true;
             globalDrawer = sidebarLoader.item;
-            
+
             // remove the listview page, and restore all other pages
             listViewPageLoader.active = false;
             if (pageStack.currentItem == defaultPage) return;
-            
+
             if (pageStack.depth == 0) {
                 pageStack.push(defaultPage);
             } else {
@@ -76,20 +76,20 @@ Kirigami.ApplicationWindow {
             // unload sidebar
             sidebarLoader.active = false;
             globalDrawer = null;
-            
+
             // insert listview page in beginning
             listViewPageLoader.active = true;
             while (pageStack.depth > 0) {
                 pageStack.pop()
             }
             pageStack.push(listViewPageLoader.item);
-            
+
             if (module.name) {
                 openModule(module.name);
             }
         }
     }
-    
+
     Loader {
         id: listViewPageLoader
         active: false
@@ -104,7 +104,7 @@ Kirigami.ApplicationWindow {
             model: proxyModel
         }
     }
-    
+
     function openModule(moduleName) {
         module.name = moduleName
         while (pageStack.depth > ((isWidescreen || SettingsApp.singleModule) ? 0 : 1)) {
@@ -112,7 +112,7 @@ Kirigami.ApplicationWindow {
         }
         pageStack.push(kcmContainer.createObject(pageStack, {"kcm": module.kcm, "internalPage": module.kcm.mainUi}));
     }
-    
+
     // if module is specified to be opened, load it
     Component.onCompleted: {
         changeNav(isWidescreen)
@@ -125,23 +125,23 @@ Kirigami.ApplicationWindow {
         target: SettingsApp
         function onModuleRequested(moduleName) {
             openModule(moduleName);
-            
-            // HACK: raise window when module is requested; 
+
+            // HACK: raise window when module is requested;
             // requestActivate() by itself doesn't seem to work
             applicationWindow().hide();
             applicationWindow().show();
             applicationWindow().requestActivate();
         }
     }
-    
+
     Module {
         id: module
     }
-    
+
     ModulesProxyModel {
         id: proxyModel
     }
-    
+
     DefaultPage {
         id: defaultPage
         visible: false

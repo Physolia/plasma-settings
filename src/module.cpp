@@ -9,6 +9,7 @@
 
 #include <KPluginFactory>
 #include <KPluginLoader>
+#include <QQmlContext>
 
 KQuickAddons::ConfigModule *Module::kcm() const
 {
@@ -40,6 +41,10 @@ void Module::setName(const QString &name)
         m_kcm = factory->create<KQuickAddons::ConfigModule>(this);
         if (!m_kcm) {
             qWarning() << "Error creating object from plugin" << loader.fileName();
+        } else {
+            // Make sure that the object still can access applicationWindow and other property from
+            // the application
+            QQmlEngine::setContextForObject(m_kcm, new QQmlContext(QQmlEngine::contextForObject(this), this));
         }
     }
 
