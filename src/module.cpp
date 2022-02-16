@@ -10,6 +10,7 @@
 #include <KPluginFactory>
 #include <KPluginLoader>
 #include <QQmlContext>
+#include <QQuickItem>
 
 KQuickAddons::ConfigModule *Module::kcm() const
 {
@@ -44,7 +45,7 @@ void Module::setName(const QString &name)
         } else {
             // Make sure that the object still can access applicationWindow and other property from
             // the application
-            QQmlEngine::setContextForObject(m_kcm, new QQmlContext(QQmlEngine::contextForObject(this), this));
+            QQmlEngine::setContextForObject(m_kcm, new QQmlContext(QQmlEngine::contextForObject(this)->parentContext(), m_kcm));
         }
     }
 
